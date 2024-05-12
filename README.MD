@@ -10,9 +10,9 @@ _Não afiliado de nenhuma forma ao Last.fm._
 Antes de rodar o script, criar um arquivo `.env` com as configurações.\
 Um exemplo de configuração pode ser encontardo em `.env.example`
 Opções de configuração:
-- user: Nome de usuário no Last.fm. Obrigatório.
-- topArtists: Quantidade de artistas para ler do perfil do usuário, em ordem  crescente de scrobbles. Máximo: 50. 0 para não pegar do perfil do usuário. Caso omitido, serão pego os 50 primeiros aristas.
-- extraArtists: Array com artistas que deseja pesquisar a posição. Informar nome e url no seguinte formato:
+- _user_: Nome de usuário no Last.fm. Obrigatório.
+- _topArtists_: Quantidade de artistas para ler do perfil do usuário, em ordem  crescente de scrobbles. Máximo: 50. 0 para não pegar do perfil do usuário. Caso omitido, serão pego os 50 primeiros aristas.
+- _extraArtists_: Array com artistas que deseja pesquisar a posição. Informar nome e url no seguinte formato:
 `{ "title": "Ode Insone", "href": "/music/Ode+Insone" }`
 
 Dependências:
