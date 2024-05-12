@@ -16,8 +16,12 @@ function get_user_rank_in_artist() {
     done
 }
 
-function build_final() {
-    echo "$1 - $2"
+function build_final_rank() {
+    RANK=0
+    if [ -n "$3" ]; then
+        RANK=$3
+    fi
+    echo `echo $1 | jq "[.[]] + [{ \"artist\": $2, \"rank\": $RANK}]"`
 }
 
 SCRIPT_PATH=$(realpath "$BASH_SOURCE")
@@ -29,18 +33,20 @@ USER=$(remove_quotes $USER_RAW)
 TOTAL_ARTISTS=`cat $ENV_FILE | jq '.topArtists'`
 EXTRA_ARTISTS=`cat $ENV_FILE | jq '.extraArtists'`
 
-ARTISTS_RAW=[]
+ARTISTS=[]
 if [ $TOTAL_ARTISTS != 0 ]; then
-    # Pega os top artistas do profile
-    ARTISTS_RAW=`curl -s 'https://www.last.fm/user/'$USER'/library/artists' | pup -i 4 '.chartlist-name a json{}'`
+    ARTISTS=`curl -s 'https://www.last.fm/user/'$USER'/library/artists' | pup -i 4 '.chartlist-name a json{}'`
 fi
-ARTISTS_RAW=`echo $ARTISTS_RAW | jq "[limit($TOTAL_ARTISTS;.[])] + $EXTRA_ARTISTS"`
+ARTISTS=`echo $ARTISTS | jq "[limit($TOTAL_ARTISTS;.[])] + $EXTRA_ARTISTS"`
 
-TOTAL_ARTISTS=`echo $ARTISTS_RAW | jq 'length'`
+TOTAL_ARTISTS=`echo $ARTISTS | jq 'length'`
 
+# FINAL_RANK=[]
 for ((i=0; i<$TOTAL_ARTISTS; i++)); do
-    ARTIST_NAME=`echo $ARTISTS_RAW | jq '.['$i'] | .title'`
-    ARTIST_LINK=`echo $ARTISTS_RAW | jq '.['$i'] | .href'`
+    ARTIST_NAME=`echo $ARTISTS | jq '.['$i'] | .title'`
+    ARTIST_LINK=`echo $ARTISTS | jq '.['$i'] | .href'`
     USER_RANK=$(get_user_rank_in_artist $(remove_quotes $ARTIST_LINK) $USER)
-    build_final "$ARTIST_NAME" $USER_RANK
+    echo -e "$ARTIST_NAME\t-\t$USER_RANK"
+    # FINAL_RANK=$(build_final_rank "$FINAL_RANK" "$ARTIST_NAME" $USER_RANK)
 done
+# echo -e $FINAL_RANK
