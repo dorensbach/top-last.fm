@@ -10,7 +10,7 @@ function get_user_rank_in_artist() {
         LISTENERS=`curl -s $URL | pup '.top-listeners-item-name > a json{}'`
         POS=`echo $LISTENERS | jq '[.[].text] | index("'$2'")'`
         if [ "$POS" != "null" ]; then
-            echo $((($POS + 1) * $i))
+            echo $((($POS + 1) + (($i - 1) * 30)))
             exit 1
         fi
     done
