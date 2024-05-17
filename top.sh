@@ -28,6 +28,7 @@ function get_previous_page() {
 
 function get_user_rank_in_artist() {
     local PREVIOUS_PAGE=$3
+    # cur=3 ; for page in $(seq $cur -1 1) $(seq $((cur+1)) 9) ; do echo $page ; done
 
     for i in `seq 1 9`; do
         URL='https://www.last.fm'$1'/+listeners?page='$i
