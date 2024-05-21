@@ -27,15 +27,17 @@ function get_previous_page() {
 }
 
 function get_user_rank_in_artist() {
-    local PREVIOUS_PAGE=$3
-    # cur=3 ; for page in $(seq $cur -1 1) $(seq $((cur+1)) 9) ; do echo $page ; done
+    local PREVIOUS_PAGE=9
+    if ! [ $3 = 0 ]; then
+        PREVIOUS_PAGE=$3
+    fi
 
-    for i in `seq 1 9`; do
-        URL='https://www.last.fm'$1'/+listeners?page='$i
+    for page in $(seq $PREVIOUS_PAGE -1 1) $(seq $(($PREVIOUS_PAGE+1)) 9) ; do
+        URL='https://www.last.fm'$1'/+listeners?page='$page
         LISTENERS=`curl -s $URL | pup '.top-listeners-item-name > a json{}'`
         POS=`echo $LISTENERS | jq '[.[].text] | index("'$2'")'`
         if [ "$POS" != "null" ]; then
-            echo $((($POS + 1) + (($i - 1) * 30)))
+            echo $((($POS + 1) + (($page - 1) * 30)))
             exit 1
         fi
     done
