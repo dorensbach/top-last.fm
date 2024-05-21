@@ -62,7 +62,10 @@ function build_final_rank() {
 function show_artist_rank() {
     local ARTIST_NAME=$(remove_quotes "$1")
     local USER_RANK=$2
-    local PREVIOUS_RANK=$3
+    local PREVIOUS_RANK=0
+    if [ -n "$3" ]; then
+        PREVIOUS_RANK=$3
+    fi
     ARTIST_NAME=$(echo $ARTIST_NAME | cut -c 1-30)
     printf "| \033[0;34m%-30s\033[0m | \033[0;32m%-9s\033[0m | \033[0;31m%-8s\033[0m |\n" "$ARTIST_NAME" "$USER_RANK" "$PREVIOUS_RANK"
 }
