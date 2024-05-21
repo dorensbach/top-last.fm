@@ -43,6 +43,7 @@ function get_user_rank_in_artist() {
             exit 1
         fi
     done
+    echo 0
 }
 
 function build_final_rank() {
@@ -50,7 +51,10 @@ function build_final_rank() {
     if [ -n "$3" ]; then
         RANK=$3
     fi
-    local PREVIOUS_RANK=$4
+    local PREVIOUS_RANK=0
+    if [ -n "$4" ]; then
+        PREVIOUS_RANK=$4
+    fi
 
     echo `echo $1 | jq "[.[]] + [{ \"artist\": $2, \"rank\": $RANK, \"previousRank\": $PREVIOUS_RANK}]"`
 }
