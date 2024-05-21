@@ -50,7 +50,11 @@ function build_final_rank() {
 }
 
 function show_artist_rank() {
-    echo -e "$1\t-\t$2"
+    local ARTIST_NAME=$(remove_quotes "$1")
+    local USER_RANK=$2
+    local PREVIOUS_RANK=$3
+    ARTIST_NAME=$(echo $ARTIST_NAME | cut -c 1-30)
+    printf "| \033[0;34m%-30s\033[0m | \033[0;32m%-9s\033[0m | \033[0;31m%-8s\033[0m |\n" "$ARTIST_NAME" "$USER_RANK" "$PREVIOUS_RANK"
 }
 
 function save_rank() {
@@ -78,6 +82,10 @@ ARTISTS=`echo $ARTISTS | jq "[limit($TOTAL_ARTISTS;.[])] + $EXTRA_ARTISTS | uniq
 TOTAL_ARTISTS=`echo $ARTISTS | jq 'length'`
 
 # TOTAL_ARTISTS=2
+# printa linha do cabeçalho amarela
+printf "%-46s\n" "+-------------------------------------------------------+"
+printf "| \033[0;34m%-30s\033[0m | \033[0;32m%-9s\033[0m | \033[0;31m%-8s\033[0m |\n" "Artista" "Top Atual" "Anterior"
+printf "%-46s\n" "+-------------------------------------------------------+"
 FINAL_RANK=[]
 for ((i=0; i<$TOTAL_ARTISTS; i++)); do
     ARTIST_NAME=`echo $ARTISTS | jq '.['$i'] | .title'`
@@ -86,7 +94,8 @@ for ((i=0; i<$TOTAL_ARTISTS; i++)); do
     PREVIOUS_PAGE=$(get_previous_page $PREVIOUS_RANK_IN_ARTIST)
     # echo $PREVIOUS_RANK_IN_ARTIST $PREVIOUS_PAGE
     USER_RANK=$(get_user_rank_in_artist $(remove_quotes $ARTIST_LINK) $USER $PREVIOUS_PAGE)
-    show_artist_rank "$ARTIST_NAME" "$USER_RANK"
+    show_artist_rank "$ARTIST_NAME" "$USER_RANK" "$PREVIOUS_RANK_IN_ARTIST"
     FINAL_RANK=$(build_final_rank "$FINAL_RANK" "$ARTIST_NAME" $USER_RANK)
 done
+printf "%-46s\n" "+-------------------------------------------------------+"
 save_rank "$FINAL_RANK"
