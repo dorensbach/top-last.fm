@@ -82,7 +82,6 @@ ARTISTS=`echo $ARTISTS | jq "[limit($TOTAL_ARTISTS;.[])] + $EXTRA_ARTISTS | uniq
 TOTAL_ARTISTS=`echo $ARTISTS | jq 'length'`
 
 # TOTAL_ARTISTS=2
-# printa linha do cabeçalho amarela
 printf "%-46s\n" "+-------------------------------------------------------+"
 printf "| \033[0;34m%-30s\033[0m | \033[0;32m%-9s\033[0m | \033[0;31m%-8s\033[0m |\n" "Artista" "Top Atual" "Anterior"
 printf "%-46s\n" "+-------------------------------------------------------+"
