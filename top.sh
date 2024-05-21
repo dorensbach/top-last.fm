@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo -e "\n"
+
 DATETIME=$(date +%Y-%m-%d\ %H:%M:%S)
 
 function remove_quotes() {
@@ -44,11 +46,13 @@ function get_user_rank_in_artist() {
 }
 
 function build_final_rank() {
-    RANK=0
+    local RANK=0
     if [ -n "$3" ]; then
         RANK=$3
     fi
-    echo `echo $1 | jq "[.[]] + [{ \"artist\": $2, \"rank\": $RANK}]"`
+    local PREVIOUS_RANK=$4
+
+    echo `echo $1 | jq "[.[]] + [{ \"artist\": $2, \"rank\": $RANK, \"previousRank\": $PREVIOUS_RANK}]"`
 }
 
 function show_artist_rank() {
@@ -60,7 +64,12 @@ function show_artist_rank() {
 }
 
 function save_rank() {
-    echo $1 | jq "sort_by(.artist) | { \"changedDateTime\": \"$DATETIME\", \"artists\": . }" > top.json
+    local PREVIOUS_DATE_TIME=""
+    if [ -n "$2" ]; then
+        PREVIOUS_DATE_TIME=$(remove_quotes "$2")
+    fi
+
+    echo $1 | jq "sort_by(.artist) | { \"changedDateTime\": \"$DATETIME\", \"previousDateTime\": \"$PREVIOUS_DATE_TIME\" , \"artists\": . }" > top.json
 }
 
 SCRIPT_PATH=$(realpath "$BASH_SOURCE")
@@ -74,6 +83,7 @@ TOTAL_ARTISTS=`cat $ENV_FILE | jq '.topArtists'`
 EXTRA_ARTISTS=`cat $ENV_FILE | jq '.extraArtists'`
 
 SAVED_RANK=$(read_previous_rank $SAVED_RANK_FILE)
+PREVIOUS_DATE_TIME=$(echo $SAVED_RANK | jq '.changedDateTime')
 
 ARTISTS=[]
 if [ $TOTAL_ARTISTS != 0 ]; then
@@ -83,7 +93,10 @@ ARTISTS=`echo $ARTISTS | jq "[limit($TOTAL_ARTISTS;.[])] + $EXTRA_ARTISTS | uniq
 
 TOTAL_ARTISTS=`echo $ARTISTS | jq 'length'`
 
-# TOTAL_ARTISTS=2
+if [ -n "$PREVIOUS_DATE_TIME" ]; then
+    printf "\033[0;36m%-s\033[0m\n" "Última atualização: $PREVIOUS_DATE_TIME"
+    echo -e "\n"
+fi
 printf "%-46s\n" "+-------------------------------------------------------+"
 printf "| \033[0;34m%-30s\033[0m | \033[0;32m%-9s\033[0m | \033[0;31m%-8s\033[0m |\n" "Artista" "Top Atual" "Anterior"
 printf "%-46s\n" "+-------------------------------------------------------+"
@@ -96,7 +109,7 @@ for ((i=0; i<$TOTAL_ARTISTS; i++)); do
     # echo $PREVIOUS_RANK_IN_ARTIST $PREVIOUS_PAGE
     USER_RANK=$(get_user_rank_in_artist $(remove_quotes $ARTIST_LINK) $USER $PREVIOUS_PAGE)
     show_artist_rank "$ARTIST_NAME" "$USER_RANK" "$PREVIOUS_RANK_IN_ARTIST"
-    FINAL_RANK=$(build_final_rank "$FINAL_RANK" "$ARTIST_NAME" $USER_RANK)
+    FINAL_RANK=$(build_final_rank "$FINAL_RANK" "$ARTIST_NAME" $USER_RANK $PREVIOUS_RANK_IN_ARTIST)
 done
 printf "%-46s\n" "+-------------------------------------------------------+"
-save_rank "$FINAL_RANK"
+save_rank "$FINAL_RANK" "$PREVIOUS_DATE_TIME"
