@@ -67,7 +67,7 @@ function show_artist_rank() {
         PREVIOUS_RANK=$3
     fi
     ARTIST_NAME=$(echo $ARTIST_NAME | cut -c 1-30)
-    printf "| \033[0;34m%-30s\033[0m | \033[0;32m%-9s\033[0m | \033[0;31m%-8s\033[0m |\n" "$ARTIST_NAME" "$USER_RANK" "$PREVIOUS_RANK"
+    printf "| \033[0;34m%-30s\033[0m | \033[0;32m%9s\033[0m | \033[0;31m%8s\033[0m |\n" "$ARTIST_NAME" "$USER_RANK" "$PREVIOUS_RANK"
 }
 
 function save_rank() {
@@ -105,7 +105,7 @@ if [ -n "$PREVIOUS_DATE_TIME" ]; then
     echo -e "\n"
 fi
 printf "%-46s\n" "+-------------------------------------------------------+"
-printf "| \033[0;34m%-30s\033[0m | \033[0;32m%-9s\033[0m | \033[0;31m%-8s\033[0m |\n" "Artista" "Top Atual" "Anterior"
+printf "| \033[0;34m%-30s\033[0m | \033[0;32m%9s\033[0m | \033[0;31m%8s\033[0m |\n" "Artista" "Top Atual" "Anterior"
 printf "%-46s\n" "+-------------------------------------------------------+"
 FINAL_RANK=[]
 for ((i=0; i<$TOTAL_ARTISTS; i++)); do
