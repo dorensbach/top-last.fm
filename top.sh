@@ -38,7 +38,7 @@ function get_user_rank_in_artist() {
         URL='https://www.last.fm'$1'/+listeners?page='$page
         LISTENERS=`curl -s $URL | pup '.top-listeners-item-name > a json{}'`
         POS=`echo $LISTENERS | jq '[.[].text] | index("'$2'")'`
-        if [ "$POS" != "null" ]; then
+        if [ "$POS" != "" ] && [ "$POS" != "null" ]; then
             echo $((($POS + 1) + (($page - 1) * 30)))
             exit 1
         fi
