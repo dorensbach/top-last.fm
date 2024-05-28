@@ -28,6 +28,12 @@ function get_previous_page() {
     echo $((($1 + 29) / 30))
 }
 
+function get_artist_link() {
+    local ARTIST_NAME=$1
+    local ARTIST_LINK=`echo $ARTIST_NAME | jq '"/music/"+@uri'`
+    echo $ARTIST_LINK
+}
+
 function get_user_rank_in_artist() {
     local PREVIOUS_PAGE=9
     if ! [ $3 = 0 ]; then
@@ -87,7 +93,7 @@ SAVED_RANK_FILE="$SCRIPT_DIR/top.json"
 USER_RAW=`cat $ENV_FILE | jq '.user'`
 USER=$(remove_quotes $USER_RAW)
 TOTAL_ARTISTS=`cat $ENV_FILE | jq '.topArtists'`
-EXTRA_ARTISTS=`cat $ENV_FILE | jq '.extraArtists'`
+EXTRA_ARTISTS=`cat $ENV_FILE | jq '.extraArtists | [{ "title": .[] }]'`
 
 SAVED_RANK=$(read_previous_rank $SAVED_RANK_FILE)
 PREVIOUS_DATE_TIME=$(echo $SAVED_RANK | jq '.changedDateTime')
@@ -111,6 +117,9 @@ FINAL_RANK=[]
 for ((i=0; i<$TOTAL_ARTISTS; i++)); do
     ARTIST_NAME=`echo $ARTISTS | jq '.['$i'] | .title'`
     ARTIST_LINK=`echo $ARTISTS | jq '.['$i'] | .href'`
+    if [ -z "$ARTIST_LINK" ] || [ "$ARTIST_LINK" == "null" ]; then
+        ARTIST_LINK=$(get_artist_link "$ARTIST_NAME")
+    fi
     PREVIOUS_RANK_IN_ARTIST=$(read_previous_rank_in_artist "$SAVED_RANK" "$ARTIST_NAME")
     PREVIOUS_PAGE=$(get_previous_page $PREVIOUS_RANK_IN_ARTIST)
     # echo $PREVIOUS_RANK_IN_ARTIST $PREVIOUS_PAGE
