@@ -52,6 +52,18 @@ function get_user_rank_in_artist() {
     echo 0
 }
 
+function get_artist_info() {
+    $ARTIST_LINK=$1
+    URL='https://www.last.fm'$1
+    ARTIST_INFO=`curl -s $URL | pup '..header-metadata-tnew-item json{}'`
+    LISTNERS=`echo $ARTIST_INFO | jq -r '[
+{title: "Listeners", value: (.[] | select(.children[0].text == "Listeners") | .children[1].children[0].children[0].text)}
+] | .[] | "\(.title): \(.value)"'
+    SCROBBLES=`echo $ARTIST_INFO | jq -r '[
+{title: "Scrobbles", value: (.[] | select(.children[0].text == "Scrobbles") | .children[1].children[0].children[0].text)}
+] | .[] | "\(.title): \(.value)"'
+}
+
 function build_final_rank() {
     local RANK=0
     if [ -n "$3" ]; then
@@ -92,17 +104,17 @@ SAVED_RANK_FILE="$SCRIPT_DIR/top.json"
 
 USER_RAW=`cat $ENV_FILE | jq '.user'`
 USER=$(remove_quotes $USER_RAW)
-TOTAL_ARTISTS=`cat $ENV_FILE | jq '.topArtists'`
+TOTAL_ARTISTS_CONFIG=`cat $ENV_FILE | jq '.topArtists'`
 EXTRA_ARTISTS=`cat $ENV_FILE | jq '.extraArtists | [{ "title": .[] }]'`
 
 SAVED_RANK=$(read_previous_rank $SAVED_RANK_FILE)
 PREVIOUS_DATE_TIME=$(echo $SAVED_RANK | jq '.changedDateTime')
 
 ARTISTS=[]
-if [ $TOTAL_ARTISTS != 0 ]; then
+if [ $TOTAL_ARTISTS_CONFIG != 0 ]; then
     ARTISTS=`curl -s 'https://www.last.fm/user/'$USER'/library/artists' | pup -i 4 '.chartlist-name a json{}'`
 fi
-ARTISTS=`echo $ARTISTS | jq "[limit($TOTAL_ARTISTS;.[])] + $EXTRA_ARTISTS | unique_by(.title)"`
+ARTISTS=`echo $ARTISTS | jq "[limit($TOTAL_ARTISTS_CONFIG;.[])] + $EXTRA_ARTISTS | unique_by(.title)"`
 
 TOTAL_ARTISTS=`echo $ARTISTS | jq 'length'`
 
