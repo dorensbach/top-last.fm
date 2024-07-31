@@ -42,7 +42,11 @@ function get_user_rank_in_artist() {
 
     for page in $(seq $PREVIOUS_PAGE -1 1) $(seq $(($PREVIOUS_PAGE+1)) 9) ; do
         URL='https://www.last.fm'$1'/+listeners?page='$page
-        LISTENERS=`curl -s $URL | pup '.top-listeners-item-name > a json{}'`
+        RESPONSE=`curl -s $URL`
+        if [ -z "$RESPONSE" ]; then
+            continue
+        fi
+        LISTENERS=`echo $RESPONSE | pup '.top-listeners-item-name > a json{}'`
         POS=`echo $LISTENERS | jq '[.[].text] | index("'$2'")'`
         if [ "$POS" != "" ] && [ "$POS" != "null" ]; then
             echo $((($POS + 1) + (($page - 1) * 30)))
