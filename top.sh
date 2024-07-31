@@ -8,6 +8,10 @@ function remove_quotes() {
     echo `sed -e 's/^"//' -e 's/"$//' <<< $1`
 }
 
+function strip_accents() {
+    echo $1 | iconv -f utf-8 -t ascii//TRANSLIT
+}
+
 function read_previous_rank() {
     if [ -f $1 ]; then
         echo `cat $1`
@@ -82,7 +86,7 @@ function build_final_rank() {
 }
 
 function show_artist_rank() {
-    local ARTIST_NAME=$(remove_quotes "$1")
+    local ARTIST_NAME=$(strip_accents "$(remove_quotes "$1")")
     local USER_RANK=$2
     local PREVIOUS_RANK=0
     if [ -n "$3" ]; then
